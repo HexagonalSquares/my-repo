@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cooked Wiki Ingredient Extractor</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Ingredient Extractor</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Ingredient Extractor - Merry Christmas Ashley!</h1>
-  <input type="text" id="recipe-url" placeholder="Paste cooked.wiki URL here" />
-  <button id="submit-btn">Fetch Ingredients</button>
-  <div id="ingredients-list"></div>
-
-  <!-- JavaScript file -->
-  <script src="script.js"></script>
+    <h1>Recipe Ingredient Extractor - Merry Christmas Ashley!</h1>
+    <form id="recipe-form">
+        <label for="recipe-url">Paste Recipe URL:</label>
+        <input type="text" id="recipe-url" placeholder="Enter recipe URL here" required>
+        <button type="submit">Get Ingredients</button>
+    </form>
+    <div id="ingredients-container">
+        <h2>Ingredients List</h2>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

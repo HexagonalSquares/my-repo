@@ -1,42 +1,54 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+const axios = require("axios");
+const cheerio = require("cheerio");
 
 exports.handler = async (event) => {
-  try {
-    const { url } = JSON.parse(event.body);
+    try {
+        const { url } = JSON.parse(event.body);
 
-    if (!url) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'URL is required' }),
-      };
+        if (!url) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: "No URL provided." }),
+            };
+        }
+
+        // Convert to cooked.wiki URL
+        const cookedWikiUrl = convertToCookedWikiUrl(url);
+
+        // Fetch the cooked.wiki page
+        const response = await axios.get(cookedWikiUrl);
+        const html = response.data;
+
+        // Parse the HTML to extract ingredients
+        const ingredients = parseIngredients(html);
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ ingredients }),
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: "Failed to process the recipe." }),
+        };
     }
+};
 
-    // Fetch the HTML content of the URL
-    const { data: html } = await axios.get(url);
+// Helper to convert URL to cooked.wiki format
+function convertToCookedWikiUrl(originalUrl) {
+    // Example transformation logic
+    return `https://cooked.wiki/recipes?source=${encodeURIComponent(originalUrl)}`;
+}
 
-    // Use Cheerio to parse the HTML
+// Helper to extract ingredients from HTML
+function parseIngredients(html) {
     const $ = cheerio.load(html);
     const ingredients = [];
 
-    // Adjust selectors to match cooked.wiki's structure
-    $('.ingredient').each((i, el) => {
-      const amount = $(el).find('.amount').text();
-      const ingredient = $(el).find('.name').text();
-      if (amount && ingredient) {
-        ingredients.push({ amount, ingredient });
-      }
+    $("li.ingredient").each((index, element) => {
+        ingredients.push($(element).text().trim());
     });
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ ingredients }),
-    };
-  } catch (error) {
-    console.error('Error processing request:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to fetch ingredients' }),
-    };
-  }
-};
+    return ingredients;
+}

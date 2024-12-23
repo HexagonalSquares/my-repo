@@ -1,42 +1,55 @@
-document.getElementById('submit-btn').addEventListener('click', async () => {
-  const url = document.getElementById('recipe-url').value;
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("recipe-form");
+  const input = document.getElementById("recipe-url");
+  const container = document.getElementById("ingredients-container");
 
-  if (!url) {
-    alert('Please enter a valid URL!');
-    return;
-  }
+  form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const url = input.value.trim();
 
-  try {
-    // Send the URL to the Netlify function
-    const response = await fetch('/.netlify/functions/handle-recipe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
-    });
+      if (!url) {
+          alert("Please enter a recipe URL.");
+          return;
+      }
 
-    if (!response.ok) throw new Error('Failed to fetch ingredients.');
+      // Send the URL to the backend
+      try {
+          const response = await fetch("/.netlify/functions/handle-recipe", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url }),
+          });
 
-    const data = await response.json();
+          const data = await response.json();
+          if (data.ingredients && Array.isArray(data.ingredients)) {
+              displayIngredients(data.ingredients);
+          } else {
+              alert("Unable to process ingredients. Try a different URL.");
+          }
+      } catch (error) {
+          console.error(error);
+          alert("Error communicating with the server.");
+      }
+  });
 
-    const ingredientsList = document.getElementById('ingredients-list');
+  function displayIngredients(ingredients) {
+      const uniqueIngredients = [...new Set(ingredients)].sort();
+      const list = document.createElement("ul");
 
-    if (!data.ingredients || data.ingredients.length === 0) {
-      ingredientsList.innerHTML = '<p>No ingredients found. Please check the URL.</p>';
-      return;
-    }
+      uniqueIngredients.forEach((ingredient) => {
+          const listItem = document.createElement("li");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.name = "ingredient";
+          checkbox.value = ingredient;
 
-    // Display ingredients with checkboxes
-    ingredientsList.innerHTML =
-      '<ul>' +
-      data.ingredients
-        .map(
-          (item) =>
-            `<li><input type="checkbox" /> ${item.amount} ${item.ingredient}</li>`
-        )
-        .join('') +
-      '</ul>';
-  } catch (error) {
-    console.error('Error fetching ingredients:', error);
-    alert('An error occurred while fetching ingredients.');
+          listItem.appendChild(checkbox);
+          listItem.appendChild(document.createTextNode(` ${ingredient}`));
+          list.appendChild(listItem);
+      });
+
+      // Clear and update the container
+      container.innerHTML = "";
+      container.appendChild(list);
   }
 });
