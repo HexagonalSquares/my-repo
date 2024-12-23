@@ -1,13 +1,15 @@
-document.getElementById('recipeForm').addEventListener('submit', async (event) => {
-  event.preventDefault(); // Prevent form submission
+document.querySelector("#recipeForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-  const recipeUrl = document.getElementById('recipeUrl').value;
-  const responseOutput = document.getElementById('responseOutput');
+  const recipeUrl = document.querySelector("#recipeUrl").value;
+  const responseOutput = document.querySelector("#responseOutput");
 
   try {
-    const response = await fetch('/.netlify/functions/handle-recipe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("/.netlify/functions/handle-recipe", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ url: recipeUrl }),
     });
 
@@ -16,9 +18,10 @@ document.getElementById('recipeForm').addEventListener('submit', async (event) =
     }
 
     const data = await response.json();
-    responseOutput.innerHTML = `<p>Processed Link: <a href="${data.processedUrl}" target="_blank">${data.processedUrl}</a></p>`;
+    responseOutput.textContent = `Success! Processed URL: ${data.message}`;
   } catch (error) {
-    console.error('Error:', error);
-    responseOutput.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+    console.error("Error:", error);
+    responseOutput.textContent =
+      "An error occurred while processing the recipe. Please try again.";
   }
 });
