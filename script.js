@@ -1,21 +1,35 @@
-document.getElementById('recipe-form').addEventListener('submit', async function (event) {
+document.querySelector('#recipe-form').addEventListener('submit', async function (event) {
     event.preventDefault(); // Prevent form from refreshing the page
 
-    const recipeUrl = document.getElementById('recipe-url').value; // Get user input
-    const responseElement = document.getElementById('response'); // Placeholder for response
+    const input = document.querySelector('#recipe-url');
+    const recipeUrl = input.value;
+
+    // Clear any previous response
+    const output = document.querySelector('#response');
+    output.textContent = 'Processing...';
 
     try {
-        // Update with your Netlify function URL
+        // Send the URL to the backend function
         const response = await fetch('https://kroger-cart-creator.netlify.app/.netlify/functions/handle-recipe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url: recipeUrl }),
         });
 
-        const result = await response.json();
-        responseElement.textContent = `Response: ${result.message}`;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Display the cooked.wiki URL
+        if (data.cookedWikiUrl) {
+            output.innerHTML = `Converted URL: <a href="${data.cookedWikiUrl}" target="_blank">${data.cookedWikiUrl}</a>`;
+        } else {
+            output.textContent = 'Error: Could not generate cooked.wiki URL.';
+        }
     } catch (error) {
-        responseElement.textContent = 'Error: Unable to process the request.';
-        console.error(error);
+        console.error('Error:', error);
+        output.textContent = 'Failed to process the recipe URL. Please try again.';
     }
 });

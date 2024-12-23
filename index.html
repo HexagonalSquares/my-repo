@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Link Converter</title>
+    <title>Recipe to Kroger Cart</title>
 </head>
 <body>
-    <h1>Recipe Link Converter</h1>
+    <h1>Recipe to Kroger Cart</h1>
     <form id="recipe-form">
-        <label for="recipe-url">Paste Recipe URL:</label><br>
-        <input type="text" id="recipe-url" name="recipe-url" placeholder="Enter recipe link" required>
-        <button type="submit">Submit</button>
+        <label for="recipe-url">Paste Recipe URL:</label>
+        <input type="text" id="recipe-url" placeholder="Enter recipe URL" required>
+        <button type="submit">Convert</button>
     </form>
-    <p id="response"></p>
+    <div id="response">
+        <!-- The cooked.wiki URL will be displayed here -->
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
