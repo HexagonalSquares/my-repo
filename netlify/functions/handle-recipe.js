@@ -1,42 +1,41 @@
-exports.handler = async (event, context) => {
-    if (event.httpMethod === 'OPTIONS') {
-        return {
-            statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type',
-            },
-        };
+const axios = require('axios');
+const cheerio = require('cheerio');
+
+exports.handler = async (event) => {
+  try {
+    const { url } = JSON.parse(event.body);
+
+    if (!url) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'URL is required' }),
+      };
     }
 
-    try {
-        const data = JSON.parse(event.body); // Extract input URL
-        const recipeUrl = data.url;
+    // Fetch the HTML content of the given URL
+    const { data: html } = await axios.get(url);
 
-        // Remove "https://" from the original URL and prepend "https://cooked.wiki/"
-        const cookedWikiUrl = `https://cooked.wiki/${recipeUrl.replace(/^https?:\/\//, '')}`;
+    // Use Cheerio to parse the HTML
+    const $ = cheerio.load(html);
+    const ingredients = [];
 
-        // Respond with the converted URL
-        return {
-            statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-            },
-            body: JSON.stringify({
-                message: 'Recipe URL successfully converted!',
-                cookedWikiUrl,
-            }),
-        };
-    } catch (error) {
-        console.error('Error converting recipe URL:', error);
+    // Adjust selectors to match the structure of cooked.wiki pages
+    $('.ingredient').each((i, el) => {
+      const amount = $(el).find('.amount').text();
+      const ingredient = $(el).find('.name').text();
+      if (amount && ingredient) {
+        ingredients.push({ amount, ingredient });
+      }
+    });
 
-        return {
-            statusCode: 500,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-            },
-            body: JSON.stringify({ error: 'Failed to process the recipe URL.' }),
-        };
-    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ ingredients }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Failed to fetch ingredients' }),
+    };
+  }
 };
