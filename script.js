@@ -6,7 +6,7 @@ document.getElementById('recipe-form').addEventListener('submit', async function
 
     try {
         // Update with your Netlify function URL
-        const response = await fetch('https://clinquant-caramel-1d98db.netlify.app/.netlify/functions/handle-recipe', {
+        const response = await fetch('https://kroger-cart-creator.netlify.app/.netlify/functions/handle-recipe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url: recipeUrl }),
