@@ -1,9 +1,13 @@
 exports.handler = async (event) => {
     try {
+        if (!event.body) {
+            throw new Error("Request body is missing");
+        }
+
         const { url } = JSON.parse(event.body);
 
         if (!url) {
-            throw new Error("URL is missing");
+            throw new Error("URL is missing in the request body");
         }
 
         const cookedUrl = url.replace('https://', 'https://cooked.wiki/');
@@ -11,8 +15,8 @@ exports.handler = async (event) => {
         return {
             statusCode: 200,
             headers: {
-                'Access-Control-Allow-Origin': '*', // Allow all origins
-                'Access-Control-Allow-Headers': 'Content-Type', // Allow specific headers
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
             },
             body: JSON.stringify({ message: `Converted URL: ${cookedUrl}` }),
         };
@@ -22,7 +26,7 @@ exports.handler = async (event) => {
             headers: {
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify({ message: 'An error occurred.', error: error.message }),
+            body: JSON.stringify({ message: "An error occurred.", error: error.message }),
         };
     }
 };
