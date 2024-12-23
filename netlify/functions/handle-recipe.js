@@ -1,54 +1,34 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-
 exports.handler = async (event) => {
-    try {
-        const { url } = JSON.parse(event.body);
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Method Not Allowed' }),
+    };
+  }
 
-        if (!url) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: "No URL provided." }),
-            };
-        }
+  try {
+    const { url } = JSON.parse(event.body);
 
-        // Convert to cooked.wiki URL
-        const cookedWikiUrl = convertToCookedWikiUrl(url);
-
-        // Fetch the cooked.wiki page
-        const response = await axios.get(cookedWikiUrl);
-        const html = response.data;
-
-        // Parse the HTML to extract ingredients
-        const ingredients = parseIngredients(html);
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ ingredients }),
-        };
-    } catch (error) {
-        console.error(error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "Failed to process the recipe." }),
-        };
+    if (!url) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'URL is required' }),
+      };
     }
+
+    // Convert the input URL to the cooked.wiki format
+    const processedUrl = `https://cooked.wiki/recipe/${encodeURIComponent(url)}`;
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ processedUrl }),
+    };
+  } catch (error) {
+    console.error('Error processing request:', error);
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Internal Server Error' }),
+    };
+  }
 };
-
-// Helper to convert URL to cooked.wiki format
-function convertToCookedWikiUrl(originalUrl) {
-    // Example transformation logic
-    return `https://cooked.wiki/recipes?source=${encodeURIComponent(originalUrl)}`;
-}
-
-// Helper to extract ingredients from HTML
-function parseIngredients(html) {
-    const $ = cheerio.load(html);
-    const ingredients = [];
-
-    $("li.ingredient").each((index, element) => {
-        ingredients.push($(element).text().trim());
-    });
-
-    return ingredients;
-}
