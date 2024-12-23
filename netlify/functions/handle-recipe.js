@@ -1,47 +1,42 @@
 exports.handler = async (event, context) => {
-    // Handle CORS preflight requests
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 200,
             headers: {
-                'Access-Control-Allow-Origin': '*', // Allows all origins
-                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS', // Allowed HTTP methods
-                'Access-Control-Allow-Headers': 'Content-Type', // Allowed headers
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
             },
         };
     }
 
-    // Main function logic
     try {
-        // Parse the incoming request body
-        const data = JSON.parse(event.body); // Assuming you're sending JSON
+        const data = JSON.parse(event.body); // Extract input URL
         const recipeUrl = data.url;
 
-        // Example logic to process the recipe URL
-        // Replace this with your actual logic for handling recipes
-        console.log(`Processing recipe URL: ${recipeUrl}`);
+        // Remove "https://" from the original URL and prepend "https://cooked.wiki/"
+        const cookedWikiUrl = `https://cooked.wiki/${recipeUrl.replace(/^https?:\/\//, '')}`;
 
-        // Create a response object (this is just an example)
-        const response = {
-            message: `Successfully processed the recipe URL: ${recipeUrl}`,
-        };
-
+        // Respond with the converted URL
         return {
             statusCode: 200,
             headers: {
-                'Access-Control-Allow-Origin': '*', // Allow the frontend to access this response
+                'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify(response),
+            body: JSON.stringify({
+                message: 'Recipe URL successfully converted!',
+                cookedWikiUrl,
+            }),
         };
     } catch (error) {
-        console.error('Error processing recipe:', error);
+        console.error('Error converting recipe URL:', error);
 
         return {
             statusCode: 500,
             headers: {
-                'Access-Control-Allow-Origin': '*', // Allow the frontend to access error responses
+                'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify({ error: 'An error occurred while processing the recipe.' }),
+            body: JSON.stringify({ error: 'Failed to process the recipe URL.' }),
         };
     }
 };
