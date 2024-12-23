@@ -12,14 +12,14 @@ exports.handler = async (event) => {
       };
     }
 
-    // Fetch the HTML content of the given URL
+    // Fetch the HTML content of the URL
     const { data: html } = await axios.get(url);
 
     // Use Cheerio to parse the HTML
     const $ = cheerio.load(html);
     const ingredients = [];
 
-    // Adjust selectors to match the structure of cooked.wiki pages
+    // Adjust selectors to match cooked.wiki's structure
     $('.ingredient').each((i, el) => {
       const amount = $(el).find('.amount').text();
       const ingredient = $(el).find('.name').text();
@@ -33,6 +33,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({ ingredients }),
     };
   } catch (error) {
+    console.error('Error processing request:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Failed to fetch ingredients' }),
