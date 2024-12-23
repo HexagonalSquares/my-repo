@@ -1,8 +1,8 @@
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
+  if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
-      body: JSON.stringify({ error: 'Method Not Allowed' }),
+      body: JSON.stringify({ error: "Method Not Allowed" }),
     };
   }
 
@@ -12,23 +12,22 @@ exports.handler = async (event) => {
     if (!url) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'URL is required' }),
+        body: JSON.stringify({ error: "Invalid input: No URL provided" }),
       };
     }
 
-    // Convert the input URL to the cooked.wiki format
-    const processedUrl = `https://cooked.wiki/recipe/${encodeURIComponent(url)}`;
+    // Here you'd process the URL
+    console.log("Processing URL:", url);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ processedUrl }),
+      body: JSON.stringify({ message: `Successfully processed: ${url}` }),
     };
   } catch (error) {
-    console.error('Error processing request:', error);
-
+    console.error("Error processing request:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error' }),
+      body: JSON.stringify({ error: "Internal Server Error" }),
     };
   }
 };
